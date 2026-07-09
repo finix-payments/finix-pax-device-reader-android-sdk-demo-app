@@ -1,0 +1,18 @@
+{
+  "PROD": {
+    "applicationId": "",
+    "deviceId": "",
+    "merchantId": "",
+    "mid": "",
+    "userId": "",
+    "password": ""
+  },
+  "SB": {
+    "applicationId": "",
+    "deviceId": "",
+    "merchantId": "",
+    "mid": "",
+    "userId": "",
+    "password": ""
+  }
+}

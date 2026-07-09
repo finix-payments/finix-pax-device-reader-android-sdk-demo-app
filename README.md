@@ -1,42 +1,80 @@
-# generic-template-repository
+# Finix PAX Device Reader — Sample Application
 
-Template repository that has some basic github actions for checking commits and an example release/build task. 
+A sample Android app demonstrating how to integrate the Finix PAX Device Reader SDK
+(`com.finix:pax-device-reader-sdk`) to run card-present transactions on an embedded PAX terminal.
 
-# Create a DevOps ticket
+It shows how to:
 
-- Create a DevOps ticket to request the new repo with an explaination of what it will be used for.
-- Ping @chrisfinix  to approve the new repo.
+- Register the PAX vendor driver and create a `TerminalDevice`.
+- Configure per-environment merchant credentials (PROD / SB).
+- Start `SALE`, `AUTHORIZATION`, and `REFUND` transactions and observe live updates.
+- Cancel an in-flight transaction.
+- Attach transaction-level tags and split transfers.
+- Capture a signature when the transaction result requires one.
 
-# Setup your repo. 
-Before getting started update your repository settings and protect your main branch.
+## Architecture
 
-## Update Features Settings
+The app follows a layered, unidirectional-data-flow architecture:
 
-- Disable Wikis
-- Disable Issues
-- Disable Projects
+```
+ui/            Jetpack Compose screens + components (stateless, driven by UiState)
+  transactions/  TransactionsViewModel — the single source of UI state
+  screen/        TransactionsScreen, ConfigurationSheet, OtherSheet
+  signature/     Signature capture sheet + PNG/Base64 rendering
+  state/         TransactionsUiState (immutable screen state)
+  components/    Reusable form fields
+domain/        Pure, testable logic: Money, TagParser, validators, TransactionLogger
+data/          ConfigRepository backed by SharedPreferences + bundled asset defaults
+device/        TerminalDeviceFactory — thin seam over FinixTerminalSDK
+di/            Hilt modules and qualifiers
+```
 
-## Update Pull Requests Settings
+Key principles:
 
-Majority of team's gitflows is to only allow rebase merging.
+- **Single source of truth.** The ViewModel exposes one immutable `TransactionsUiState`
+  via `StateFlow`; the UI is a pure function of that state plus callbacks.
+- **The SDK is only touched at the edges.** `TerminalDeviceFactory` wraps
+  `FinixTerminalSDK.createDevice(...)`, and the `TerminalDevice` is supplied to the
+  ViewModel through Hilt assisted injection because it depends on the hosting `Activity`.
+- **All I/O is off the main thread** and hidden behind `ConfigRepository`.
+- **Business logic is framework-free**, so `domain/` can be unit-tested on the JVM.
 
-- Disable "Allow merge commits"
-- Disable "Allow squash merging"
-- Enable "Automatically delete head branches"
+## Configuration
 
-## Create a branch protection rule for main
+Default credentials are read on first launch from `app/src/main/assets/merchant_config.json`,
+keyed by environment name:
 
-- Under Code and Automation -> Branches
-- Select "Add classic branch protection rule"
-- Branch name "main"
-- Enable Require a pull request before merging
-- Enable Require approvals
-- Enable Require status checks to pass before merging
-- Search for "pr-commits" in the status check search bar and select "pr-commits / Validate PR Commit Messages"
-- Enable Do not allow bypassing the above settings
+```json
+{
+  "PROD": { "applicationId": "AP...", "deviceId": "DV...", "merchantId": "MU...", "mid": "...", "userId": "...", "password": "..." },
+  "SB":   { "applicationId": "AP...", "deviceId": "DV...", "merchantId": "MU...", "mid": "...", "userId": "...", "password": "..." }
+}
+```
 
-## Code best practices
-- If you're going to use jooq, make sure you add a [commit](https://github.com/finix-payments/processing/pull/8987/commits/f98a479b4e03329c79a89679540e452f35292ca7) similar to this to block the use the .asterisk() method. 
+Credentials can also be entered and saved at runtime via the **Configurations** menu; values
+are validated (identifier prefixes, minimum password length) before being persisted per
+environment.
 
-## Cleanup this readme
-Test that everything is working by creating a pull request to delete the setup steps from this readme and verify checks are running, and all the settings are correct. 
+## Requirements
+
+- Android Studio (AGP 8.13+)
+- JDK 17
+- `minSdk` 26, `compileSdk` / `targetSdk` 36
+- A PAX terminal for card-present transactions
+
+The SDK is resolved from the Central Portal snapshots repository, configured in
+`settings.gradle.kts`.
+
+## Build conventions
+
+- **Version catalog.** All dependency and plugin coordinates live in
+  `gradle/libs.versions.toml` and are referenced as `libs.…` / `alias(libs.plugins.…)`
+  from the build scripts, so versions are declared once.
+- **KSP2 for annotation processing.** Hilt is processed with KSP rather than KAPT. KAPT is
+  not compatible with Kotlin 2.3+, and KSP2 has been the default since 2025. KSP is versioned
+  independently of Kotlin (this project uses KSP `2.3.10`).
+- **Release shrinking.** The release build enables R8 code shrinking and resource shrinking;
+  keep rules for Hilt, kotlinx.serialization, Compose, and the Finix SDK live in
+  `app/proguard-rules.pro` (and `app/src/main/keepRules/`).
+- **Gradle performance.** Parallel execution, the build cache, and the configuration cache are
+  enabled in `gradle.properties`, along with non-transitive R classes.
