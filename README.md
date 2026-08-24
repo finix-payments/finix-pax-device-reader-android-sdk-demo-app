@@ -46,8 +46,8 @@ keyed by environment name:
 
 ```json
 {
-  "PROD": { "applicationId": "AP...", "deviceId": "DV...", "merchantId": "MU...", "mid": "...", "userId": "...", "password": "..." },
-  "SB":   { "applicationId": "AP...", "deviceId": "DV...", "merchantId": "MU...", "mid": "...", "userId": "...", "password": "..." }
+  "PROD": { "deviceId": "DV...", "merchantId": "MU...", "userId": "...", "password": "..." },
+  "SB":   { "deviceId": "DV...", "merchantId": "MU...", "userId": "...", "password": "..." }
 }
 ```
 

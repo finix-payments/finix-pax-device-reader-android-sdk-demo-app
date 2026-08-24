@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.finix.common.coreDeviceSdk.api.MerchantData
 import com.finix.common.coreDeviceSdk.api.models.Environment
-import com.finix.common.coreDeviceSdk.api.transaction.Country
 import com.finix.paxdevicereaderapplication.device.TerminalDeviceFactory
 import com.finix.paxdevicereaderapplication.ui.screen.TransactionsScreen
 import com.finix.paxdevicereaderapplication.ui.theme.PaxDeviceReaderTheme
@@ -55,13 +54,10 @@ class MainActivity : ComponentActivity() {
         /** Empty credentials used only until the ViewModel loads the persisted configuration. */
         val PLACEHOLDER_MERCHANT_DATA = MerchantData(
             merchantId = "",
-            mid = "",
             deviceId = "",
-            applicationId = "",
             env = Environment.PROD,
             userId = "",
-            password = "",
-            country = Country.USA,
+            password = ""
         )
     }
 }

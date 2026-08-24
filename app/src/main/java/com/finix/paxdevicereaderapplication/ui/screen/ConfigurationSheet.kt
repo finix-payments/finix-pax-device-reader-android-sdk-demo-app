@@ -137,16 +137,6 @@ private fun MerchantDataForm(
             )
         }
 
-        FieldSection("APPLICATION") {
-            ConfigField(
-                label = "ID",
-                value = merchantData.applicationId,
-                errorKey = "applicationId",
-                validationErrors = validationErrors,
-                onValueChange = { onChange(merchantData.copy(applicationId = it)) },
-            )
-        }
-
         FieldSection("MERCHANT") {
             ConfigField(
                 label = "ID",
@@ -154,13 +144,6 @@ private fun MerchantDataForm(
                 errorKey = "merchantId",
                 validationErrors = validationErrors,
                 onValueChange = { onChange(merchantData.copy(merchantId = it)) },
-            )
-            ConfigField(
-                label = "MID",
-                value = merchantData.mid,
-                errorKey = "mid",
-                validationErrors = validationErrors,
-                onValueChange = { onChange(merchantData.copy(mid = it)) },
             )
         }
 
