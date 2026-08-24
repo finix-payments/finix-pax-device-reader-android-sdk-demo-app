@@ -2,7 +2,6 @@ package com.finix.paxdevicereaderapplication.ui.state
 
 import com.finix.common.coreDeviceSdk.api.MerchantData
 import com.finix.common.coreDeviceSdk.api.models.Environment
-import com.finix.common.coreDeviceSdk.api.transaction.Country
 import com.finix.common.coreDeviceSdk.api.transaction.SplitTransfer
 
 /**
@@ -23,13 +22,10 @@ data class TransactionsUiState(
     private companion object {
         val EMPTY_MERCHANT_DATA = MerchantData(
             merchantId = "",
-            mid = "",
             deviceId = "",
-            applicationId = "",
             env = Environment.PROD,
             userId = "",
-            password = "",
-            country = Country.USA,
+            password = ""
         )
     }
 }

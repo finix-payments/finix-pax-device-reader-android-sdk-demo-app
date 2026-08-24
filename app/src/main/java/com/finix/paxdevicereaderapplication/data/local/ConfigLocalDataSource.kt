@@ -34,9 +34,7 @@ class ConfigLocalDataSource @Inject constructor(
     fun readConfig(env: Environment): MerchantConfigDto =
         MerchantConfigDto(
             deviceId = prefs.getString(envKey(KEY_DEVICE_ID, env), "").orEmpty(),
-            applicationId = prefs.getString(envKey(KEY_APPLICATION_ID, env), "").orEmpty(),
             merchantId = prefs.getString(envKey(KEY_MERCHANT_ID, env), "").orEmpty(),
-            mid = prefs.getString(envKey(KEY_MID, env), "").orEmpty(),
             userId = prefs.getString(envKey(KEY_USERNAME, env), "").orEmpty(),
             password = prefs.getString(envKey(KEY_PASSWORD, env), "").orEmpty(),
         )
@@ -44,9 +42,7 @@ class ConfigLocalDataSource @Inject constructor(
     fun writeConfig(env: Environment, config: MerchantConfigDto) {
         prefs.edit {
             putString(envKey(KEY_DEVICE_ID, env), config.deviceId)
-            putString(envKey(KEY_APPLICATION_ID, env), config.applicationId)
             putString(envKey(KEY_MERCHANT_ID, env), config.merchantId)
-            putString(envKey(KEY_MID, env), config.mid)
             putString(envKey(KEY_USERNAME, env), config.userId)
             putString(envKey(KEY_PASSWORD, env), config.password)
         }
@@ -93,9 +89,7 @@ class ConfigLocalDataSource @Inject constructor(
         const val PREF_NAME = "merchant_data"
 
         const val KEY_DEVICE_ID = "device_id"
-        const val KEY_APPLICATION_ID = "application_id"
         const val KEY_MERCHANT_ID = "merchant_id"
-        const val KEY_MID = "merchant_mid"
         const val KEY_USERNAME = "username"
         const val KEY_PASSWORD = "password"
         const val KEY_SPLIT_TRANSFERS = "split_merchants"

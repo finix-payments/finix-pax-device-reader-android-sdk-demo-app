@@ -11,10 +11,6 @@ data class ValidationResult(
     val errors: Map<String, String> = emptyMap(),
 ) {
     val isValid: Boolean get() = errors.isEmpty()
-
-    companion object {
-        val VALID = ValidationResult()
-    }
 }
 
 /**
@@ -43,7 +39,6 @@ private inline fun validate(block: ErrorCollector.() -> Unit): ValidationResult 
 
 /** Finix identifier prefixes. */
 private object IdPrefix {
-    val APPLICATION = Regex("^AP[a-zA-Z0-9]+$")
     val MERCHANT = Regex("^MU[a-zA-Z0-9]+$")
     val DEVICE = Regex("^DV[a-zA-Z0-9]+$")
     const val MIN_PASSWORD_LENGTH = 8
@@ -57,17 +52,11 @@ object MerchantConfigValidator {
             "deviceId" to "Device ID is not valid"
         }
 
-        require(data.applicationId.isNotBlank()) { "applicationId" to "Application ID is required" }
-        require(data.applicationId.isBlank() || data.applicationId.matches(IdPrefix.APPLICATION)) {
-            "applicationId" to "Application ID is not valid"
-        }
-
         require(data.merchantId.isNotBlank()) { "merchantId" to "Merchant ID is required" }
         require(data.merchantId.isBlank() || data.merchantId.matches(IdPrefix.MERCHANT)) {
             "merchantId" to "Merchant ID is not valid"
         }
 
-        require(data.mid.isNotBlank()) { "mid" to "MID is required" }
         require(data.userId.isNotBlank()) { "userId" to "Username is required" }
         require(data.password.length >= IdPrefix.MIN_PASSWORD_LENGTH) {
             "password" to "Password must be at least ${IdPrefix.MIN_PASSWORD_LENGTH} characters"

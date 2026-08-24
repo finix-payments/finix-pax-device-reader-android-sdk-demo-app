@@ -2,7 +2,6 @@ package com.finix.paxdevicereaderapplication.data.local
 
 import com.finix.common.coreDeviceSdk.api.MerchantData
 import com.finix.common.coreDeviceSdk.api.models.Environment
-import com.finix.common.coreDeviceSdk.api.transaction.Country
 import kotlinx.serialization.Serializable
 
 /**
@@ -12,32 +11,25 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class MerchantConfigDto(
-    val applicationId: String = "",
     val deviceId: String = "",
     val merchantId: String = "",
-    val mid: String = "",
     val userId: String = "",
     val password: String = "",
 ) {
-    fun toMerchantData(env: Environment, country: Country = Country.USA): MerchantData =
+    fun toMerchantData(env: Environment): MerchantData =
         MerchantData(
             merchantId = merchantId,
-            mid = mid,
             deviceId = deviceId,
-            applicationId = applicationId,
             env = env,
             userId = userId,
             password = password,
-            country = country,
         )
 
     companion object {
         fun from(data: MerchantData): MerchantConfigDto =
             MerchantConfigDto(
-                applicationId = data.applicationId,
                 deviceId = data.deviceId,
                 merchantId = data.merchantId,
-                mid = data.mid,
                 userId = data.userId,
                 password = data.password,
             )
