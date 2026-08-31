@@ -10,5 +10,17 @@ permissions:
   contents: write
   pull-requests: read
 jobs:
-  pr-commits:
-    uses: finix-payments/finix-github-actions/.github/workflows/pull-request-commit-check.yaml@main
+  validate-commits:
+    name: Validate PR Commit Messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Validate PR Commits
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^([Rr]evert )|^((minor|fix|config|infra|ci|doc|spelling|dependency)|[A-Z]{2,14}-\d+): (.*){128}$'
+          error: 'Commit messages must match /^([Rr]evert )|^((minor|fix|config|infra|ci|doc|spelling|dependency)|[A-Z]{2,14}-\d+): (.*){128}$/'
+          excludeDescription: 'true'
+          excludeTitle: 'true'
+          checkAllCommitMessages: 'true'
+          accessToken: ${{ secrets.GITHUB_TOKEN }}
