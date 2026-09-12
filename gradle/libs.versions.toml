@@ -19,7 +19,7 @@ composeBom = "2026.06.01"
 kotlinxSerializationJson = "1.11.0"
 
 # Finix
-finixPaxDeviceReader = "0.2.0"
+finixPaxDeviceReader = "0.2.2"
 
 # Testing
 junit = "4.13.2"
