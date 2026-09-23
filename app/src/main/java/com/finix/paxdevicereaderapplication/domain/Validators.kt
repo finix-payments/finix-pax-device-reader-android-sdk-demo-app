@@ -1,6 +1,7 @@
 package com.finix.paxdevicereaderapplication.domain
 
 import com.finix.common.coreDeviceSdk.api.MerchantData
+import com.finix.common.coreDeviceSdk.api.transaction.ReferencedRefundRequest
 import com.finix.common.coreDeviceSdk.api.transaction.SplitTransfer
 
 /**
@@ -41,6 +42,7 @@ private inline fun validate(block: ErrorCollector.() -> Unit): ValidationResult 
 private object IdPrefix {
     val MERCHANT = Regex("^MU[a-zA-Z0-9]+$")
     val DEVICE = Regex("^DV[a-zA-Z0-9]+$")
+    val TRANSFER = Regex("^TR[a-zA-Z0-9]+$")
     const val MIN_PASSWORD_LENGTH = 8
 }
 
@@ -75,5 +77,16 @@ object SplitTransferValidator {
         require(TagParser.isValid(TagParser.format(split.tags))) {
             "tags" to "Invalid format. Use key:value, key2:value2"
         }
+    }
+}
+
+/** Validates the referenced-refund form. */
+object ReferencedRefundValidator {
+    fun validate(request: ReferencedRefundRequest): ValidationResult = validate {
+        require(request.transferId.isNotBlank()) { "transferId" to "Transfer ID is required" }
+        require(request.transferId.isBlank() || request.transferId.matches(IdPrefix.TRANSFER)) {
+            "transferId" to "Transfer ID is not valid"
+        }
+        require(request.amount > 0) { "amount" to "Amount must be greater than 0" }
     }
 }

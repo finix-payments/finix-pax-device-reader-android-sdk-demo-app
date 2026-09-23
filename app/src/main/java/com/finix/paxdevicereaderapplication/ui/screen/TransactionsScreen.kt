@@ -78,6 +78,7 @@ fun TransactionsScreen(viewModel: TransactionsViewModel) {
             TransactionsAppBar(
                 onOpenConfiguration = { activeSheet = ActiveSheet.CONFIGURATION },
                 onOpenOther = { activeSheet = ActiveSheet.OTHER },
+                onOpenReferencedRefund = viewModel::showReferencedRefundDialog,
             )
         },
     ) { innerPadding ->
@@ -144,6 +145,14 @@ fun TransactionsScreen(viewModel: TransactionsViewModel) {
         ActiveSheet.NONE -> Unit
     }
 
+    if (uiState.isReferencedRefundDialogVisible) {
+        ReferencedRefundDialog(
+            initialAmount = amount,
+            onDismiss = viewModel::dismissReferencedRefundDialog,
+            onConfirm = viewModel::initiateReferencedRefund,
+        )
+    }
+
     if (uiState.isSignatureSheetVisible) {
         SignatureBottomSheet(
             onConfirm = viewModel::submitSignature,
@@ -161,6 +170,7 @@ fun TransactionsScreen(viewModel: TransactionsViewModel) {
 private fun TransactionsAppBar(
     onOpenConfiguration: () -> Unit,
     onOpenOther: () -> Unit,
+    onOpenReferencedRefund: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -190,6 +200,13 @@ private fun TransactionsAppBar(
                     onClick = {
                         menuExpanded = false
                         onOpenOther()
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text("Referenced Refund") },
+                    onClick = {
+                        menuExpanded = false
+                        onOpenReferencedRefund()
                     },
                 )
             }
