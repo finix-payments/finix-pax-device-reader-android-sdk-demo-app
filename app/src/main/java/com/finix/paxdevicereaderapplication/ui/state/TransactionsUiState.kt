@@ -15,6 +15,7 @@ data class TransactionsUiState(
     val tags: String = "",
     val isProcessing: Boolean = false,
     val isSignatureSheetVisible: Boolean = false,
+    val isReferencedRefundDialogVisible: Boolean = false,
 ) {
     val environment: Environment get() = merchantData.env
     val hasSplitTransfers: Boolean get() = splitTransfers.isNotEmpty()
