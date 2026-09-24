@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.finix.common.coreDeviceSdk.api.MerchantData
 import com.finix.common.coreDeviceSdk.api.models.Environment
 import com.finix.common.coreDeviceSdk.api.terminal.TerminalDevice
+import com.finix.common.coreDeviceSdk.api.transaction.ReferencedRefundRequest
 import com.finix.common.coreDeviceSdk.api.transaction.SplitTransfer
 import com.finix.common.coreDeviceSdk.api.transaction.TransactionHandle
 import com.finix.common.coreDeviceSdk.api.transaction.TransactionRequest
@@ -135,7 +136,7 @@ class TransactionsViewModel @AssistedInject constructor(
                 )
                 device.startTransaction(request).also { activeTransaction = it }
             }.onSuccess { handle ->
-                observeUpdates(handle, transactionType)
+                observeUpdates(handle, transactionType.name)
             }.onFailure { error ->
                 logger.log("$transactionType failed to start: ${error.message}")
                 setProcessing(false)
@@ -143,7 +144,43 @@ class TransactionsViewModel @AssistedInject constructor(
         }
     }
 
-    private suspend fun observeUpdates(handle: TransactionHandle, type: TransactionType) {
+    // --- Referenced refund ------------------------------------------------------------------
+
+    fun showReferencedRefundDialog() {
+        _uiState.update { it.copy(isReferencedRefundDialogVisible = true) }
+    }
+
+    fun dismissReferencedRefundDialog() {
+        _uiState.update { it.copy(isReferencedRefundDialogVisible = false) }
+    }
+
+    /**
+     * Refunds an already-processed transfer by id. No card is presented - the transfer
+     * identifies the payment instrument - so unlike [startTransaction] this never engages the
+     * reader, but it reports progress on the same [TransactionHandle] protocol.
+     *
+     * For a refund that *does* take a card, use [startTransaction] with
+     * [TransactionType.REFUND].
+     */
+    fun initiateReferencedRefund(request: ReferencedRefundRequest) {
+        logger.log("Starting referenced refund for ${request.transferId}…")
+        dismissReferencedRefundDialog()
+        viewModelScope.launch {
+            runCatching {
+                // Tags come from the "Others" sheet, the same source startTransaction uses,
+                // rather than being re-entered on the refund form.
+                val tagged = request.copy(tags = TagParser.toMap(_uiState.value.tags))
+                device.initiateReferencedRefund(tagged).also { activeTransaction = it }
+            }.onSuccess { handle ->
+                observeUpdates(handle, REFERENCED_REFUND_LABEL)
+            }.onFailure { error ->
+                logger.log("$REFERENCED_REFUND_LABEL failed to start: ${error.message}")
+                setProcessing(false)
+            }
+        }
+    }
+
+    private suspend fun observeUpdates(handle: TransactionHandle, type: String) {
         runCatching {
             handle.updates.collect { update ->
 
@@ -184,7 +221,13 @@ class TransactionsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             logger.log("Cancelling transaction…")
             handle.cancel()
-            activeTransaction = null
+                .onSuccess { activeTransaction = null }
+                .onFailure { error ->
+                    // The SDK refuses to cancel once the request is with the payment network,
+                    // so the transaction keeps running and still reports its own outcome.
+                    // Clearing the handle here would drop that.
+                    logger.log("Cancel rejected: ${error.message}")
+                }
         }
     }
 
@@ -220,5 +263,9 @@ class TransactionsViewModel @AssistedInject constructor(
 
     private fun setProcessing(processing: Boolean) {
         _uiState.update { it.copy(isProcessing = processing) }
+    }
+
+    private companion object {
+        const val REFERENCED_REFUND_LABEL = "Referenced refund"
     }
 }
