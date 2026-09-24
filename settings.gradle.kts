@@ -1,23 +1,31 @@
 pluginManagement {
     repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
+        mavenLocal()
+        maven {
+            url = uri("https://finix.repo.sonatype.app/repository/finix-maven/")
+            credentials {
+                username = System.getenv("NEXUS_TOKEN_USER")
+                password = System.getenv("NEXUS_TOKEN_PASSWORD")
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
     }
 }
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
-        mavenCentral()
-        // Snapshot repository for the Finix SDK, scoped to the com.finix group.
+        mavenLocal()
         maven {
-            name = "CentralPortalSnapshots"
-            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
-            mavenContent {
-                snapshotsOnly()
-                includeGroup("com.finix")
+            url = uri("https://finix.repo.sonatype.app/repository/finix-maven/")
+            credentials {
+                username = System.getenv("NEXUS_TOKEN_USER")
+                password = System.getenv("NEXUS_TOKEN_PASSWORD")
+            }
+            authentication {
+                create<org.gradle.authentication.http.BasicAuthentication>("basic")
             }
         }
     }
