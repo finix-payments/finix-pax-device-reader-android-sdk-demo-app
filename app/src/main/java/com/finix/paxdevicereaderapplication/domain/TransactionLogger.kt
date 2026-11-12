@@ -23,7 +23,7 @@ class TransactionLogger(
 
     /** Appends [message] as a new timestamped line. */
     fun log(message: String) {
-        val timestamp = formatter.get().format(now())
+        val timestamp = formatter.get()?.format(now())
         _text.update { current -> "$current[$timestamp] $message\n" }
         Log.d("TransactionLogger", message)
     }
