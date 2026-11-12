@@ -207,6 +207,11 @@ class TransactionsViewModel @AssistedInject constructor(
                         logger.log("$type error: ${update.result.failureMessage}")
                         setProcessing(false)
                     }
+
+                    is TransactionUpdate.Started -> {
+                        logger.log("Transaction Started: ${update.type}")
+                        setProcessing(false)
+                    }
                 }
             }
         }.onFailure { error ->
